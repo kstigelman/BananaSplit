@@ -1,12 +1,14 @@
 # Banana Split
+v0.1.0
 
 Command-line application to quickly make small, simple edits to image files.
+Utilizes the SFML Graphics library.
 
 Supported transformations:
 - Precision cropping
 - Division into multiple equally-sized images
-- Rotation
 - Lossy compression
+- Rotation
 
 ## How to Use
 
