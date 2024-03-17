@@ -12,10 +12,7 @@
  */
 #include <iostream>
 #include <SFML/Graphics.hpp>
-// For open, close
-#include <fcntl.h>
-// For read, write, lseek
-#include <unistd.h>
+
 // For printf
 #include <stdio.h>
 // For exit
@@ -112,10 +109,10 @@ public:
     
     if (filename.find (".")) {
       output->saveToFile (filename);
-      printf ("Saved image to '%s'", filename);
+      printf ("Saved image to '%s'", filename.c_str());
     }
     else {
-      string fullname = filename + "." + ext;
+      string fullname = filename + "." + extension;
       output->saveToFile (fullname);
     }
     
@@ -316,7 +313,7 @@ open (NewImage& source, string filepath) {
 }
 void
 save (NewImage& source, string filepath) {
-  if (!checkImageLoaded (imageSource))
+  if (!checkImageLoaded (source))
     return;
   if (!source.save (filepath))
     printf ("You haven't made any modifications to the image!\n");
@@ -324,18 +321,18 @@ save (NewImage& source, string filepath) {
 
 void
 save (NewImage& source) {
-  if (!checkImageLoaded (imageSource))
+  if (!checkImageLoaded (source))
     return;
   string ext;
   printf ("Select a file extension type (default is 'png'): ");
   getline (cin, ext);
-  setExtension (ext);
+  setExtension (source, ext);
 
   string filename;
-  printf ("Enter a name for the saved file:")
+  printf ("Enter a name for the saved file:");
   getline (cin, filename);
 
-  if (!source.save (filename, ext))
+  if (!source.save (filename))
     printf ("You haven't made any modifications to the image!\n");
 }
 

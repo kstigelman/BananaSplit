@@ -37,5 +37,6 @@ Supported transformations:
     cmake -S . -B build
     cmake --build build --config Release
     ```
-4. Run ./bsplit.exe
+4. Run the BananaSplit executable found in the build/bin folder
+
 5. Enjoy!
