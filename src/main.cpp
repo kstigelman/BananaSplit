@@ -207,6 +207,10 @@ eval ()
     string input;
     getline (cin, input);
 
+    if (input.length() == 0) {
+        printf ("bspl > ");
+        continue;
+    }
     vector<string> command;
 
     string temp;
