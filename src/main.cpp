@@ -15,9 +15,7 @@
 
 // For printf
 #include <stdio.h>
-// For exit
-#include <stdlib.h>
-// For strcmp, strtok
+
 #include <string.h>
 
 #include <random>
@@ -25,7 +23,9 @@
 #include <vector>
 #include <queue>
 #include <sstream>
-#include <windows.h>
+
+#include "ImageContainer.hpp"
+//#include <windows.h>
 
 using std::cout;
 using std::string;
@@ -42,145 +42,52 @@ using sf::IntRect;
 using sf::Color;
 
 
-class NewImage {
-private:
-  string filepath;
-  string extension;
-  Image* source;
-  Image* output;
-
-  sf::Vector2u center;
-  bool loaded;
-public:
-  NewImage () {
-    loaded = false;
-    source = nullptr;
-    output = nullptr;
-    extension = ".png";
-  }
-  void generate (string fp) {
-    if (loaded == true)
-      delete source;
-
-    filepath = fp;
-    source = new Image ();
-
-    if (source->loadFromFile (filepath)) {
-
-      center = sf::Vector2u (source->getSize ().x / 2, source->getSize().y / 2);
-      loaded = true;
-    }
-  }
-  Image* getImage () {
-    return source;
-  }
-  Image* getOutput () {
-    return output;
-  }
-  Image* createNewOutput (int l, int h) {
-    if (output != nullptr) {
-      delete output;
-      output = nullptr;
-    }
-
-    output = new Image ();
-    output->create (l, h);
-    return output;
-  }
-  void setExtension (string ext) {
-    extension = ext;
-  }
-  string getExtension () {
-    return extension;
-  }
-  string getFilepath () {
-    return filepath;
-  }
-  void close () {
-    delete source;
-    source = nullptr;
-    delete output;
-    output = nullptr;
-    filepath = string();
-  }
-  bool save (string filename) {
-    if (output == nullptr)
-      return false;
-    
-    if (filename.find (".")) {
-      output->saveToFile (filename);
-      printf ("Saved image to '%s'", filename.c_str());
-    }
-    else {
-      string fullname = filename + "." + extension;
-      output->saveToFile (fullname);
-    }
-    
-    delete output;
-    output = nullptr;
-    
-    return true;
-  }
-  sf::Vector2u getCenter () {
-    return center;
-  }
-  void setCenter (sf::Vector2u newCenter) {
-    if (newCenter.x > source->getSize().x || newCenter.y > source->getSize().y)
-      return;
-    center = newCenter;
-  }
-  bool
-  isLoaded () {
-    return !loaded;
-  }
-};
-
 bool
-isLoaded (NewImage image);
+isLoaded (ImageContainer image);
 
 void
 eval ();
 
 void
-center (NewImage& imageSource, sf::Vector2u center);
+center (ImageContainer& imageSource, sf::Vector2u center);
 
 void
 fail ();
 
 bool 
-checkImageLoaded (NewImage& img);
+checkImageLoaded (ImageContainer& img);
 
 void
-negate (NewImage& imageSource, int filter);
+negate (ImageContainer& imageSource, int filter);
 
 void
 help();
 void
-compress (NewImage& imageSource, int cf);
+compress (ImageContainer& imageSource, int cf);
 
 void
-split (NewImage& imageSource, int x, int y = 0, bool trunc = true);
+split (ImageContainer& imageSource, int x, int y = 0, bool trunc = true);
 
 void
-dice (NewImage& imageSource, int x, int y = 0, bool trunc = true);
+dice (ImageContainer& imageSource, int x, int y = 0, bool trunc = true);
 
 void
-save (NewImage& imageSource, string filepath);
+save (ImageContainer& imageSource, string filepath);
 
 void
-save (NewImage& imageSource);
+save (ImageContainer& imageSource);
 
 void
-setExtension (NewImage& imageSource, string type);
+setExtension (ImageContainer& imageSource, string type);
 
 void
-open (NewImage& imageSource, string filepath);
+open (ImageContainer& imageSource, string filepath);
 
 void
-rotate (NewImage& imageSource, int direction);
+rotate (ImageContainer& imageSource, int direction);
 
 void
-crop (NewImage& imageSource, int width = 0, int height = 0);
+crop (ImageContainer& imageSource, int width = 0, int height = 0);
 
 
 int 
@@ -193,13 +100,13 @@ void
 eval ()
 {
 
-  NewImage imageSource;
+  ImageContainer imageSource;
 
   string command;
-  HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-  SetConsoleTextAttribute(hConsole, 14);
+  //HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+  // SetConsoleTextAttribute(hConsole, 14);
   printf ("\nWelcome to Banana Split\n\n");
-  SetConsoleTextAttribute(hConsole, 15);
+  //SetConsoleTextAttribute(hConsole, 15);
   printf ("Type help for a list of commands.\n\nbspl > ");
 
   while (1)
@@ -306,17 +213,20 @@ eval ()
         fail ();
       }
     }
+    if (command[0] == "exit" || command[0] == "quit")
+      return;
+
     printf ("bspl > ");
   }
 }
 
 void
-open (NewImage& source, string filepath) {
+open (ImageContainer& source, string filepath) {
   source.generate (filepath);
   printf ("Opened %s (%d, %d).\n", filepath.c_str(), source.getImage ()->getSize ().x, source.getImage ()->getSize ().y);
 }
 void
-save (NewImage& source, string filepath) {
+save (ImageContainer& source, string filepath) {
   if (!checkImageLoaded (source))
     return;
   if (!source.save (filepath))
@@ -324,7 +234,7 @@ save (NewImage& source, string filepath) {
 }
 
 void
-save (NewImage& source) {
+save (ImageContainer& source) {
   if (!checkImageLoaded (source))
     return;
   string ext;
@@ -341,7 +251,7 @@ save (NewImage& source) {
 }
 
 bool
-isLoaded (NewImage image) {
+isLoaded (ImageContainer image) {
   return true;
 }
 void
@@ -349,7 +259,7 @@ fail () {
   printf ("\nError: Please use 'help' to review the commands!\n");
 }
 void
-compress (NewImage& imageSource, int cf) 
+compress (ImageContainer& imageSource, int cf) 
 {
   if (!checkImageLoaded (imageSource))
     return;
@@ -382,7 +292,7 @@ compress (NewImage& imageSource, int cf)
 }
 
 void
-split (NewImage& imageSource, int x, int y, bool trunc) {
+split (ImageContainer& imageSource, int x, int y, bool trunc) {
   if (!checkImageLoaded (imageSource))
     return;
   if (x < 0 || y < 0) {
@@ -420,7 +330,7 @@ split (NewImage& imageSource, int x, int y, bool trunc) {
 	}
 }
 void
-rotate (NewImage& imageSource, int direction) {
+rotate (ImageContainer& imageSource, int direction) {
   if (!checkImageLoaded (imageSource))
     return;
 
@@ -461,7 +371,7 @@ rotate (NewImage& imageSource, int direction) {
 }
 
 void
-crop (NewImage& imageSource, int width, int height) {
+crop (ImageContainer& imageSource, int width, int height) {
   if (!checkImageLoaded (imageSource))
     return;
 
@@ -565,7 +475,7 @@ crop (NewImage& imageSource, int width, int height) {
 }
 
 void
-dice (NewImage& imageSource, int x, int y, bool trunc) {
+dice (ImageContainer& imageSource, int x, int y, bool trunc) {
   if (!checkImageLoaded (imageSource))
     return;
 
@@ -622,14 +532,14 @@ dice (NewImage& imageSource, int x, int y, bool trunc) {
 }
 
 void
-center (NewImage& imageSource, sf::Vector2u center) {
+center (ImageContainer& imageSource, sf::Vector2u center) {
   if (!checkImageLoaded (imageSource))
     return;
   imageSource.setCenter (center);
 }
 
 void
-negate (NewImage& imageSource, int filter) {
+negate (ImageContainer& imageSource, int filter) {
   if (!checkImageLoaded (imageSource))
     return;
 
@@ -656,7 +566,7 @@ help () {
   printf ("save <filepath>    ===>  Save cached image to a given location.\n\n");
 }
 
-bool checkImageLoaded (NewImage& img) {
+bool checkImageLoaded (ImageContainer& img) {
   if (img.getImage () == nullptr) {
     printf ("\033[31mError: No image has been loaded!\033[0m\n");
     return false;
@@ -665,6 +575,6 @@ bool checkImageLoaded (NewImage& img) {
 }
 
 void
-setExtension (NewImage& imageSource, string type) {
+setExtension (ImageContainer& imageSource, string type) {
   imageSource.setExtension (type);
 }
