@@ -58,6 +58,10 @@ public:
     output = nullptr;
     extension = ".png";
   }
+  ~NewImage () {
+    delete source;
+    delete output;
+  }
   void generate (string fp) {
     if (loaded == true)
       delete source;
@@ -109,7 +113,7 @@ public:
     
     if (filename.find (".")) {
       output->saveToFile (filename);
-      printf ("Saved image to '%s'", filename.c_str());
+      printf ("Saved image to '%s'\n", filename.c_str());
     }
     else {
       string fullname = filename + "." + extension;
@@ -182,6 +186,8 @@ rotate (NewImage& imageSource, int direction);
 void
 crop (NewImage& imageSource, int width = 0, int height = 0);
 
+void 
+upscale (NewImage& imageSource, int scaleFactor = 2);
 
 int 
 main ()
@@ -289,6 +295,14 @@ eval ()
       else
         crop (imageSource);
     }
+    if (command[0] == "upscale") {
+      if (command.size () >= 2) {
+        upscale (imageSource, std::stoi (command[1]));
+      }
+      else {
+        fail ();
+      }
+    } 
     // dice
     if (command[0] == "dice") {
       if (command.size () >= 4) {
@@ -306,6 +320,10 @@ eval ()
         fail ();
       }
     }
+    if (command[0] == "quit" || command[0] == "exit") {
+      return;
+    }
+    
     printf ("bspl > ");
   }
 }
@@ -380,7 +398,27 @@ compress (NewImage& imageSource, int cf)
 		}
 	}
 }
+void
+upscale (NewImage& imageSource, int scaleFactor) {
+  if (!checkImageLoaded (imageSource))
+    return;
 
+  if (scaleFactor <= 0) {
+    printf ("\033[31mError: Scale factor must be greater than 0!\033[0m\n");
+    return;
+  }
+
+  Image* input = imageSource.getImage ();
+  int sl = input->getSize().x * scaleFactor;
+  int sh = input->getSize().y * scaleFactor;
+  Image* output = imageSource.createNewOutput (sl, sh);
+
+  for (int i = 0; i < sl; ++i) {
+    for (int j = 0; j < sh; ++j) {
+      output->setPixel (i, j, input->getPixel (i / scaleFactor, j / scaleFactor));
+    }
+  }
+}
 void
 split (NewImage& imageSource, int x, int y, bool trunc) {
   if (!checkImageLoaded (imageSource))
