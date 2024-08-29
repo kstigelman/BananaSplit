@@ -187,7 +187,19 @@ void
 crop (ImageContainer& imageSource, int width = 0, int height = 0);
 
 void 
-upscale (NewImage& imageSource, int scaleFactor = 2);
+upscale (ImageContainer& imageSource, int scaleFactor = 2);
+
+void
+wild (ImageContainer& imageSource);
+
+sf::Color 
+add (sf::Color color, sf::Color color2);
+
+int 
+magnitude (sf::Color color);
+
+sf::Color 
+subtract (sf::Color color1, sf::Color color2);
 
 int 
 main ()
@@ -320,6 +332,9 @@ eval ()
         fail ();
       }
     }
+    if (command[0] == "wild") {
+      wild (imageSource);
+    }
     if (command[0] == "exit" || command[0] == "quit")
       return;
 
@@ -366,6 +381,11 @@ fail () {
   printf ("\nError: Please use 'help' to review the commands!\n");
 }
 void
+wild (ImageContainer& imageSource)
+{
+  
+}
+void
 compress (ImageContainer& imageSource, int cf) 
 {
   if (!checkImageLoaded (imageSource))
@@ -398,7 +418,7 @@ compress (ImageContainer& imageSource, int cf)
 	}
 }
 void
-upscale (NewImage& imageSource, int scaleFactor) {
+upscale (ImageContainer& imageSource, int scaleFactor) {
   if (!checkImageLoaded (imageSource))
     return;
 
@@ -704,4 +724,24 @@ bool checkImageLoaded (ImageContainer& img) {
 void
 setExtension (ImageContainer& imageSource, string type) {
   imageSource.setExtension (type);
+}
+
+sf::Color 
+add (sf::Color color1, sf::Color color2)
+{
+	return sf::Color (color1.r + color2.r, color1.g + color2.g, color1.b + color2.b);
+	
+}
+int magnitude (sf::Color color)
+{
+	float r = std::pow (color.r, 2);
+	float g = std::pow (color.g, 2);
+	float b = std::pow (color.b, 2);
+	
+	return std::sqrt(r + g + b);
+}
+sf::Color subtract (sf::Color color1, sf::Color color2)
+{
+	return sf::Color (color1.r - color2.r, color1.g - color2.g, color1.b - color2.b);
+	
 }
