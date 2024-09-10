@@ -10,7 +10,7 @@ FetchContent_Declare(SFML
     GIT_TAG 2.6.x)
 FetchContent_MakeAvailable(SFML)
 
-add_executable(BananaSplit src/main.cpp)
+add_executable(BananaSplit src/main.cpp bspl.rc)
 target_link_libraries(BananaSplit PRIVATE sfml-graphics)
 target_compile_features(BananaSplit PRIVATE cxx_std_17)
 

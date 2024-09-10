@@ -1,6 +1,5 @@
 /*
   Project    : Banana Split
-  Filename   : splice.cpp
   Author     : Kyler Stigelman
   Description: A simple application to cut up images into boxes, or downscale an image.
  */
@@ -289,7 +288,10 @@ eval ()
     // split
     if (command[0] == "split") {
       if (command.size () >= 3) {
-        split (imageSource, std::stoi (command[1]), std::stoi (command[2]), true);
+        if (command.size () >= 4 && command[3] == "trunc")
+          split (imageSource, std::stoi (command[1]), std::stoi (command[2]), true);
+        else
+          split (imageSource, std::stoi (command[1]), std::stoi (command[2]), false);
       }
       else if (command.size () == 2) {
         split (imageSource, std::stoi (command[1]));
@@ -383,7 +385,64 @@ fail () {
 void
 wild (ImageContainer& imageSource)
 {
+  if (!checkImageLoaded (imageSource))
+    return;
+
+  Image* input = imageSource.getImage (); 
   
+	int l = input->getSize().x;
+	int h = input->getSize().y;
+
+  Image* output = imageSource.createNewOutput (l, h);
+  
+  int cf = 100;
+  int cf2 = 100;
+
+	int trueI = 0;
+	int trueJ = 0;
+	
+	
+	sf::Color base =sf::Color (45, 57, 32);
+	int baseMag = magnitude (base);
+
+	int tolerance = 30;
+	
+	int rt = 30;
+	int gt = 30;
+	int bt = 30;
+	for (int j = 0; j < h; ++j)
+	{
+		for (int i = 0; i < l; ++i) 
+		{
+			
+			if (magnitude (input->getPixel(i, j)) < baseMag + tolerance &&
+			    magnitude (input->getPixel(i, j)) > baseMag - tolerance)
+			{
+				if (input->getPixel (i, j).r < base.r + rt &&  input->getPixel (i, j).r > base.r - rt &&
+					input->getPixel (i, j).g < base.g + gt &&  input->getPixel (i, j).g > base.g - gt &&
+				    input->getPixel (i, j).b < base.b + bt &&  input->getPixel (i, j).b > base.b - bt)
+			
+				output->setPixel (i, j, sf::Color (input->getPixel(i, j).r, input->getPixel(i, j).g, input->getPixel(i, j).b));
+				//else
+					//cOutput.setPixel (i, j, sf::Color (input.getPixel(i, j).r, input.getPixel(i, j).g, input.getPixel(i, j).b));
+			}
+			else
+			{
+				output->setPixel (i, j, sf::Color (input->getPixel(i, j).r, input->getPixel(i, j).g, input->getPixel(i, j).b));
+			}
+			if (i % 3 == 0)
+			{
+				output->setPixel (i, j, sf::Color (input->getPixel(i, j).r, input->getPixel(i, j).g, input->getPixel(i, j).b));
+			}
+			if (i % 7 == 0)
+			{
+				//if (h - j > 0) 
+				//		cOutput.setPixel (i, h - j, sf::Color (input.getPixel(i, j).r, input.getPixel(i, j).b, input.getPixel(i, j).g));
+			}
+		}
+	}
+
+ 
 }
 void
 compress (ImageContainer& imageSource, int cf) 
@@ -706,11 +765,23 @@ negate (ImageContainer& imageSource, int filter) {
 }
 void
 help () {
-  printf ("open <filepath>    ===>  Load an image for editing.\n\n");
-  printf ("compress <factor>  ===>  Downscale image by a given factor. Caches image in memory.\n\n");
-  printf ("split <X> <*Y>     ===>  Split an image into X by Y boxes.\n");
-  printf ("                         *Y parameter is optional. If empty, will use X.\n\n");
-  printf ("save <filepath>    ===>  Save cached image to a given location.\n\n");
+  printf ("open <filepath>         ===>  Load an image for editing.\n\n");
+  printf ("compress <factor>       ===>  Downscale image by a given factor. Caches image in memory.\n\n");
+  printf ("split <X> <*Y> <*trunc> ===>  Split an image into X by Y boxes.\n");
+  printf ("                              *Y parameter is optional. If empty, will use X.\n\n");
+  printf ("                              *trunc parameter is optional. If present, excess pixels will get truncated.\n\n");
+  printf ("                              *trunc is always true if Y is not provided.\n\n");
+  printf ("rotate <90/-90>         ===>  Rotate the image 90 degrees clockwise or counter-clockwise.\n");
+  printf ("crop <w> <*h>           ===>  Crops the image from the center to be of dimensions w x h (width x height).\n");
+  printf ("                              *h parameter is optional. If empty, will crop as a square of size w.\n\n");
+  printf ("center <X> <Y>          ===>  Set the center of the image at a given pixel location. Operations such as crop,\n\n");
+  printf ("                              which truncates pixels, will differ depending upon the skew of the center.\n\n");
+  printf ("upscale <factor>        ===>  Upscales the image dimensions by a given factor.\n\n");
+  printf ("negate <threshold>      ===>  Creates a black and white image. Intensity of image will depend on the \"threshold value\"\n\n");
+  printf ("                              which each pixel is compared to (Recommended: 180 - 250).\n\n");
+  printf ("save <filepath>         ===>  Save cached image to a given location.\n\n");
+  printf ("close                   ===>  Close the currently open image file.\n\n");
+  printf ("quit                    ===>  Exit the application.\n\n");
 }
 
 bool checkImageLoaded (ImageContainer& img) {
