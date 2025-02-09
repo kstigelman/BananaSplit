@@ -415,7 +415,19 @@ wild (ImageContainer& imageSource)
 		for (int i = 0; i < l; ++i) 
 		{
 			
-			if (magnitude (input->getPixel(i, j)) < baseMag + tolerance &&
+      if (i < 1900 && j > 1800 && j < 2600) {
+        if (i + std::cos (i) * 2 < 0 || j +std::sin (j) * 6 < 0) {
+          output->setPixel (int (i + std::cos(i * 0.5) * 2), int (j + std::sin (j * 0.5) * 6), add (input->getPixel (i, j), sf::Color (40, 60, 10))) ;
+        }
+        else {
+          output->setPixel (i, j, add (input->getPixel (i, j), sf::Color (22, 100, 32))) ;
+        }
+
+
+      } else {
+        output->setPixel (i, j, input->getPixel (i, j)) ;
+      }
+			/*if (magnitude (input->getPixel(i, j)) < baseMag + tolerance &&
 			    magnitude (input->getPixel(i, j)) > baseMag - tolerance)
 			{
 				if (input->getPixel (i, j).r < base.r + rt &&  input->getPixel (i, j).r > base.r - rt &&
@@ -438,7 +450,7 @@ wild (ImageContainer& imageSource)
 			{
 				//if (h - j > 0) 
 				//		cOutput.setPixel (i, h - j, sf::Color (input.getPixel(i, j).r, input.getPixel(i, j).b, input.getPixel(i, j).g));
-			}
+			}*/
 		}
 	}
 
