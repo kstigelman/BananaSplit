@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <SFML/Graphics.hpp>
 
@@ -33,6 +34,7 @@ private:
   string extension;
   Image* source;
   Image* output;
+  bool saved = false;
 
   sf::Vector2u center;
   bool loaded;
@@ -50,6 +52,10 @@ public:
       delete source;
     if (waitingOutput)
       delete output;
+  }
+  bool
+  hasSaved () {
+    return saved;
   }
   void generate (string fp) {
     if (loaded == true)
@@ -119,6 +125,7 @@ public:
     delete output;
     output = nullptr;
     waitingOutput = false;
+    saved = true;
     return true;
   }
   sf::Vector2u getCenter () {

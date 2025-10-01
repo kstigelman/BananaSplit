@@ -41,106 +41,6 @@ using sf::IntRect;
 using sf::Color;
 
 
-class NewImage {
-private:
-  string filepath;
-  string extension;
-  Image* source;
-  Image* output;
-
-  sf::Vector2u center;
-  bool loaded;
-public:
-  NewImage () {
-    loaded = false;
-    source = nullptr;
-    output = nullptr;
-    extension = ".png";
-  }
-  ~NewImage () {
-    delete source;
-    delete output;
-  }
-  void generate (string fp) {
-    if (loaded == true)
-      delete source;
-
-    filepath = fp;
-    source = new Image ();
-
-    if (source->loadFromFile (filepath)) {
-
-      center = sf::Vector2u (source->getSize ().x / 2, source->getSize().y / 2);
-      loaded = true;
-    }
-  }
-  Image* getImage () {
-    return source;
-  }
-  Image* getOutput () {
-    return output;
-  }
-  Image* createNewOutput (int l, int h) {
-    if (output != nullptr) {
-      delete output;
-      output = nullptr;
-    }
-
-    output = new Image ();
-    output->create (l, h);
-    return output;
-  }
-  void setExtension (string ext) {
-    extension = ext;
-  }
-  string getExtension () {
-    return extension;
-  }
-  string getFilepath () {
-    return filepath;
-  }
-  void close () {
-    delete source;
-    source = nullptr;
-    delete output;
-    output = nullptr;
-    filepath = string();
-  }
-  bool save (string filename) {
-    if (output == nullptr)
-      return false;
-    
-    if (filename.find (".")) {
-      output->saveToFile (filename);
-      printf ("Saved image to '%s'\n", filename.c_str());
-    }
-    else {
-      string fullname = filename + "." + extension;
-      output->saveToFile (fullname);
-    }
-    
-    delete output;
-    output = nullptr;
-    
-    return true;
-  }
-  sf::Vector2u getCenter () {
-    return center;
-  }
-  void setCenter (sf::Vector2u newCenter) {
-    if (newCenter.x > source->getSize().x || newCenter.y > source->getSize().y)
-      return;
-    center = newCenter;
-  }
-  bool
-  isLoaded () {
-    return !loaded;
-  }
-};
-
-bool
-isLoaded (ImageContainer image);
-
 void
 eval ();
 
@@ -186,7 +86,7 @@ void
 crop (ImageContainer& imageSource, int width = 0, int height = 0);
 
 void 
-upscale (ImageContainer& imageSource, int scaleFactor = 2);
+grow (ImageContainer& imageSource, int scaleFactor = 2);
 
 void
 wild (ImageContainer& imageSource);
@@ -309,9 +209,9 @@ eval ()
       else
         crop (imageSource);
     }
-    if (command[0] == "upscale") {
+    if (command[0] == "grow") {
       if (command.size () >= 2) {
-        upscale (imageSource, std::stoi (command[1]));
+        grow (imageSource, std::stoi (command[1]));
       }
       else {
         fail ();
@@ -374,10 +274,6 @@ save (ImageContainer& source) {
     printf ("You haven't made any modifications to the image!\n");
 }
 
-bool
-isLoaded (ImageContainer image) {
-  return true;
-}
 void
 fail () {
   printf ("\nError: Please use 'help' to review the commands!\n");
@@ -489,7 +385,7 @@ compress (ImageContainer& imageSource, int cf)
 	}
 }
 void
-upscale (ImageContainer& imageSource, int scaleFactor) {
+grow (ImageContainer& imageSource, int scaleFactor) {
   if (!checkImageLoaded (imageSource))
     return;
 
@@ -788,7 +684,7 @@ help () {
   printf ("                              *h parameter is optional. If empty, will crop as a square of size w.\n\n");
   printf ("center <X> <Y>          ===>  Set the center of the image at a given pixel location. Operations such as crop,\n\n");
   printf ("                              which truncates pixels, will differ depending upon the skew of the center.\n\n");
-  printf ("upscale <factor>        ===>  Upscales the image dimensions by a given factor.\n\n");
+  printf ("grow <factor>           ===>  Grows the image dimensions by a given factor.\n\n");
   printf ("negate <threshold>      ===>  Creates a black and white image. Intensity of image will depend on the \"threshold value\"\n\n");
   printf ("                              which each pixel is compared to (Recommended: 180 - 250).\n\n");
   printf ("save <filepath>         ===>  Save cached image to a given location.\n\n");
