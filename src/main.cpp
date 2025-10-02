@@ -11,7 +11,8 @@
  *******************************************************************************
  */
 #include <iostream>
-#include <SFML/Graphics.hpp>
+#include "SFML/Graphics/Image.hpp"
+#include "SFML/System/Vector2.hpp"
 
 // For printf
 #include <stdio.h>
