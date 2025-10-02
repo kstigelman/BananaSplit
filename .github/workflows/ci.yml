@@ -12,10 +12,10 @@ jobs:
       matrix:
         platform:
         #- { name: Windows VS2019, os: windows-2019  }
-        - { name: Windows, os: windows-2022  }
-        - { name: Linux,      os: ubuntu-latest }
+        - { name: win64, os: windows-latest  }
+        - { name: linux-x64,      os: ubuntu-latest }
         #- { name: Linux Clang,    os: ubuntu-latest, flags: -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ }
-        - { name: macOS,          os: macos-latest  }
+        - { name: macos,          os: macos-latest  }
         config:
         - { name: Shared, flags: -DBUILD_SHARED_LIBS=TRUE }
         - { name: Static, flags: -DBUILD_SHARED_LIBS=FALSE }
@@ -23,7 +23,7 @@ jobs:
     steps:
     - name: Install Linux Dependencies
       if: runner.os == 'Linux'
-      run: sudo apt-get update && sudo apt-get install libxrandr-dev libxcursor-dev libudev-dev libopenal-dev libflac-dev libvorbis-dev libgl1-mesa-dev libegl1-mesa-dev sudo apt install libfreetype-dev
+      run: sudo apt-get update && sudo apt-get install libxrandr-dev libxcursor-dev libudev-dev libopenal-dev libflac-dev libvorbis-dev libgl1-mesa-dev libegl1-mesa-dev libfreetype-dev
 
     - name: Checkout
       uses: actions/checkout@v3
@@ -39,15 +39,13 @@ jobs:
     - name: Install
       shell: bash
       run: cmake --install build --config Release
+
+    - name: Rename binary
+      run: mv output/BananaSplit output/BananaSplit-${{ matrix.name }}
   
-    - name: Create Release
-      id: create_release
-      uses: kstigelman/BananaSplit@v1
+    - name: Upload to Release
+      uses: kstigelman/BananaSplit@v1.0.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
       with:
-        files: output/banana-split-${{ matrix.name }}
-        tag_name: ${{ github.ref }}-v1.0.0
-        release_name: ${{ github.ref }}
-        draft: false
-        prerelease: false
+        files: output/BananaSplit-${{ matrix.name }}
