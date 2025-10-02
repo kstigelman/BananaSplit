@@ -42,7 +42,7 @@ jobs:
       run: cmake --install build --config Release
 
     - name: Rename binary
-      run: mv output/BananaSplit output/BananaSplit-${{ matrix.name }}
+      run: mv bin/BananaSplit bin/BananaSplit-${{ matrix.name }}
   
     - name: Upload binaries to Release
       uses: svenstaro/upload-release-action@v2
@@ -50,8 +50,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: output/BananaSplit
-        asset_name: BananaSplit
+        file: bin/BananaSplit-${{ matrix.name }}
+        asset_name: BananaSplit-${{ matrix.name }}
         tag: ${{ github.ref }}
         overwrite: true
         body: ""
