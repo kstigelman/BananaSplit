@@ -45,7 +45,6 @@ jobs:
       run: mv output/BananaSplit output/BananaSplit-${{ matrix.name }}
   
     - name: Upload binaries to Release
-      uses: kstigelman/BananaSplit@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
       with:
