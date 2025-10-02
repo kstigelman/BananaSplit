@@ -1,6 +1,5 @@
 #include <iostream>
-#include "SFML/Graphics/Image.hpp"
-#include "SFML/System/Vector2.hpp"
+#include <SFML/Graphics.hpp>
 
 // For printf
 #include <stdio.h>
