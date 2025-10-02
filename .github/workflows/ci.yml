@@ -1,6 +1,9 @@
 name: CI
 
-on: [push, pull_request]
+on:
+  push:
+    tags:
+      - 'v*'
 
 jobs:
   build:
@@ -26,8 +29,10 @@ jobs:
       run: sudo apt-get update && sudo apt-get install libxrandr-dev libxcursor-dev libudev-dev libopenal-dev libflac-dev libvorbis-dev libgl1-mesa-dev libegl1-mesa-dev libfreetype-dev
 
     - name: Checkout
-      uses: actions/checkout@v3
-
+      uses: actions/checkout@v4
+    - name: Create Release
+      id: create_release
+      uses: 
     - name: Configure
       shell: bash
       run: cmake -S . -B build -DCMAKE_INSTALL_PREFIX=install ${{matrix.platform.flags}} ${{matrix.config.flags}}
@@ -43,8 +48,8 @@ jobs:
     - name: Rename binary
       run: mv output/BananaSplit output/BananaSplit-${{ matrix.name }}
   
-    - name: Upload to Release
-      uses: kstigelman/BananaSplit@v1
+    - name: Upload binaries to Release
+      uses: kstigelman/upload-release-action@v2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
       with:
