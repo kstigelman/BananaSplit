@@ -2,6 +2,7 @@
   Project    : Banana Split
   Author     : Kyler Stigelman
   Description: A simple application to cut up images into boxes, or downscale an image.
+  Version    : 1.0.0
  */
 
 /*
@@ -41,102 +42,6 @@ using sf::IntRect;
 using sf::Color;
 
 
-class NewImage {
-private:
-  string filepath;
-  string extension;
-  Image* source;
-  Image* output;
-
-  sf::Vector2u center;
-  bool loaded;
-public:
-  NewImage () {
-    loaded = false;
-    source = nullptr;
-    output = nullptr;
-    extension = ".png";
-  }
-  ~NewImage () {
-    delete source;
-    delete output;
-  }
-  void generate (string fp) {
-    if (loaded == true)
-      delete source;
-
-    filepath = fp;
-    source = new Image ();
-
-    if (source->loadFromFile (filepath)) {
-
-      center = sf::Vector2u (source->getSize ().x / 2, source->getSize().y / 2);
-      loaded = true;
-    }
-  }
-  Image* getImage () {
-    return source;
-  }
-  Image* getOutput () {
-    return output;
-  }
-  Image* createNewOutput (int l, int h) {
-    if (output != nullptr) {
-      delete output;
-      output = nullptr;
-    }
-
-    output = new Image ();
-    output->create (l, h);
-    return output;
-  }
-  void setExtension (string ext) {
-    extension = ext;
-  }
-  string getExtension () {
-    return extension;
-  }
-  string getFilepath () {
-    return filepath;
-  }
-  void close () {
-    delete source;
-    source = nullptr;
-    delete output;
-    output = nullptr;
-    filepath = string();
-  }
-  bool save (string filename) {
-    if (output == nullptr)
-      return false;
-    
-    if (filename.find (".")) {
-      output->saveToFile (filename);
-      printf ("Saved image to '%s'\n", filename.c_str());
-    }
-    else {
-      string fullname = filename + "." + extension;
-      output->saveToFile (fullname);
-    }
-    
-    delete output;
-    output = nullptr;
-    
-    return true;
-  }
-  sf::Vector2u getCenter () {
-    return center;
-  }
-  void setCenter (sf::Vector2u newCenter) {
-    if (newCenter.x > source->getSize().x || newCenter.y > source->getSize().y)
-      return;
-    center = newCenter;
-  }
-  bool
-  isLoaded () {
-    return !loaded;
-  }
-};
 
 bool
 isLoaded (ImageContainer image);
@@ -159,7 +64,7 @@ negate (ImageContainer& imageSource, int filter);
 void
 help();
 void
-compress (ImageContainer& imageSource, int cf);
+shrink (ImageContainer& imageSource, int cf);
 
 void
 split (ImageContainer& imageSource, int x, int y = 0, bool trunc = true);
@@ -183,10 +88,13 @@ void
 rotate (ImageContainer& imageSource, int direction);
 
 void
+mirror (ImageContainer& imageSource, int direction);
+
+void
 crop (ImageContainer& imageSource, int width = 0, int height = 0);
 
 void 
-upscale (ImageContainer& imageSource, int scaleFactor = 2);
+grow (ImageContainer& imageSource, int scaleFactor = 2);
 
 void
 wild (ImageContainer& imageSource);
@@ -215,9 +123,9 @@ eval ()
   string command;
   //HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
   // SetConsoleTextAttribute(hConsole, 14);
-  printf ("\nWelcome to Banana Split\n\n");
+  printf ("\n\033[33mWelcome to Banana Split!\n\033[32mv1.0.0 kstigelman 2025\n\n");
   //SetConsoleTextAttribute(hConsole, 15);
-  printf ("Type help for a list of commands.\n\nbspl > ");
+  printf ("\033[0mType 'open <image path>' to open an image, or type 'help' for a list of commands.\n\nbspl > ");
 
   while (1)
   {
@@ -251,11 +159,11 @@ eval ()
         fail ();
       }
     }
-    // compress
-    if (command[0] == "compress") {
+    // shrink
+    if (command[0] == "shrink") {
       
       if (command.size () >= 2) {
-        compress (imageSource, std::stoi (command[1]));
+        shrink (imageSource, std::stoi (command[1]));
       }
       else {
         fail ();
@@ -263,10 +171,12 @@ eval ()
     }
     // rotate
     if (command[0] == "rotate") {
-      if (command[1] == "90")
+      if (command[1] == "+")
         rotate(imageSource, 90);
-      else if (command[1] == "-90")
+      else if (command[1] == "-")
         rotate (imageSource, -90);
+      //else if (command[1] == "++" || command[1] == "--")
+      //  rotate (imageSource, 180);
     }
     // save
     if (command[0] == "save") {
@@ -309,9 +219,9 @@ eval ()
       else
         crop (imageSource);
     }
-    if (command[0] == "upscale") {
+    if (command[0] == "grow") {
       if (command.size () >= 2) {
-        upscale (imageSource, std::stoi (command[1]));
+        grow (imageSource, std::stoi (command[1]));
       }
       else {
         fail ();
@@ -334,8 +244,11 @@ eval ()
         fail ();
       }
     }
-    if (command[0] == "wild") {
+    /*if (command[0] == "wild") {
       wild (imageSource);
+    }*/
+    if (command[0] == "close") {
+      imageSource.close ();
     }
     if (command[0] == "exit" || command[0] == "quit")
       return;
@@ -457,13 +370,13 @@ wild (ImageContainer& imageSource)
  
 }
 void
-compress (ImageContainer& imageSource, int cf) 
+shrink (ImageContainer& imageSource, int cf) 
 {
   if (!checkImageLoaded (imageSource))
     return;
 
   if (cf < 0) {
-    printf ("\033[31mError: Compression factor must not be negative!\033[0m\n");
+    printf ("\033[31mError: shrinkion factor must not be negative!\033[0m\n");
     return;
   }
 
@@ -474,7 +387,7 @@ compress (ImageContainer& imageSource, int cf)
 	
   Image* output = imageSource.createNewOutput (l / cf, h / cf);
 
-  std::printf ("Compressing image (%d, %d) down to %d x %d.\n", l, h, l / cf, h / cf);
+  std::printf ("shrinking image (%d, %d) down to %d x %d.\n", l, h, l / cf, h / cf);
 	
 	for (int i = 0; i < l / cf; i++)
 	{
@@ -489,7 +402,7 @@ compress (ImageContainer& imageSource, int cf)
 	}
 }
 void
-upscale (ImageContainer& imageSource, int scaleFactor) {
+grow (ImageContainer& imageSource, int scaleFactor) {
   if (!checkImageLoaded (imageSource))
     return;
 
@@ -706,10 +619,13 @@ dice (ImageContainer& imageSource, int x, int y, bool trunc) {
 	int px = input->getSize().x / x;
   int py = input->getSize().y / x;
   
-  if (y != 0)
+  if (y != 0) {
     py = input->getSize().y / y;
-  
-  printf ("Splitting file into %d x %d boxes.\n", x, (px == py ? x : y));
+    printf ("Splitting file into %d x %d boxes.\n", x, (px == py ? x : y));
+  }
+  else {
+    printf ("Splitting file into %d x %d boxes.\n", x, x);   
+  }
 
 	Image output;
   output.create (px, py);
@@ -742,7 +658,7 @@ dice (ImageContainer& imageSource, int x, int y, bool trunc) {
 		  for (int j = 0; j < height; ++j)
 		  {
 			  output.copy(*input, 0, 0, IntRect(i * px, j * py, px, py), false);
-			  output.saveToFile("data/" + to_string(i + j * width) + ".png");
+			  output.saveToFile(to_string(i + j * width) + ".png");
 		  }
 	  }
 	  printf ("Splitting completed.\n");
@@ -778,17 +694,17 @@ negate (ImageContainer& imageSource, int filter) {
 void
 help () {
   printf ("open <filepath>         ===>  Load an image for editing.\n\n");
-  printf ("compress <factor>       ===>  Downscale image by a given factor. Caches image in memory.\n\n");
+  printf ("shrink <factor>         ===>  Downscale image by a given factor. Caches image in memory.\n\n");
   printf ("split <X> <*Y> <*trunc> ===>  Split an image into X by Y boxes.\n");
   printf ("                              *Y parameter is optional. If empty, will use X.\n\n");
   printf ("                              *trunc parameter is optional. If present, excess pixels will get truncated.\n\n");
   printf ("                              *trunc is always true if Y is not provided.\n\n");
-  printf ("rotate <90/-90>         ===>  Rotate the image 90 degrees clockwise or counter-clockwise.\n");
+  printf ("rotate <+/->         ===>  Rotate the image 90 degrees clockwise (+), counter-clockwise (-).\n");
   printf ("crop <w> <*h>           ===>  Crops the image from the center to be of dimensions w x h (width x height).\n");
   printf ("                              *h parameter is optional. If empty, will crop as a square of size w.\n\n");
   printf ("center <X> <Y>          ===>  Set the center of the image at a given pixel location. Operations such as crop,\n\n");
   printf ("                              which truncates pixels, will differ depending upon the skew of the center.\n\n");
-  printf ("upscale <factor>        ===>  Upscales the image dimensions by a given factor.\n\n");
+  printf ("grow <factor>           ===>  Grows the image dimensions by a given factor.\n\n");
   printf ("negate <threshold>      ===>  Creates a black and white image. Intensity of image will depend on the \"threshold value\"\n\n");
   printf ("                              which each pixel is compared to (Recommended: 180 - 250).\n\n");
   printf ("save <filepath>         ===>  Save cached image to a given location.\n\n");
