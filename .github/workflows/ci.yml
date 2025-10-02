@@ -30,9 +30,7 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@v4
-    - name: Create Release
-      id: create_release
-      uses: 
+
     - name: Configure
       shell: bash
       run: cmake -S . -B build -DCMAKE_INSTALL_PREFIX=install ${{matrix.platform.flags}} ${{matrix.config.flags}}
