@@ -32,6 +32,18 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@v4
+    - name: Create release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        body: |
+          BananaSplit
+        draft: true
+        prerelease: false
 
     - name: Configure
       shell: bash
@@ -56,7 +68,6 @@ jobs:
     - name: Upload binaries to Release (UNIX)
       if: runner.os == 'Linux' || runner.os == 'MacOS'
       uses: xresloader/upload-to-github-release@v1
-      id: create_release
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
       with:
@@ -65,7 +76,6 @@ jobs:
     - name: Upload binaries to Release (WINDOWS)
       if: runner.os == 'Windows'
       uses: xresloader/upload-to-github-release@v1
-      id: create_release
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
       with:
