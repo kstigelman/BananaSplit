@@ -62,5 +62,7 @@ jobs:
       uses: xresloader/upload-to-github-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        permissions:
+          contents: write
       with:
         file: install/bin/BananaSplit-${{ matrix.platform.name }}.exe
