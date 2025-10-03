@@ -43,33 +43,24 @@ jobs:
 
     - name: Rename binary (WINDOWS)
       if: runner.os == 'Windows'
-      run: mv install/bin/BananaSplit.exe install/bin/BananaSplit-${{ matrix.name }}.exe
+      run: mv install/bin/BananaSplit.exe install/bin/BananaSplit-${{ matrix.platform.name }}.exe
 
     - name: Rename binary (UNIX)
       if: runner.os == 'Linux' || runner.os == 'MacOS'
-      run: mv install/bin/BananaSplit install/bin/BananaSplit-${{ matrix.name }}
+      run: mv install/bin/BananaSplit install/bin/BananaSplit-${{ matrix.platform.name }}
 
     - name: Upload binaries to Release (UNIX)
       if: runner.os == 'Linux' || runner.os == 'MacOS'
-      uses: svenstaro/upload-release-action@v2
+      uses: svenstaro/upload-release-action@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
       with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: install/bin/BananaSplit-${{ matrix.name }}
-        asset_name: BananaSplit-${{ matrix.name }}
-        tag: ${{ github.ref }}
-        overwrite: true
-        body: ""
+        file: install/bin/BananaSplit-${{ matrix.platform.name }}
 
     - name: Upload binaries to Release (WINDOWS)
       if: runner.os == 'Windows'
-      uses: svenstaro/upload-release-action@v2
+      uses: svenstaro/upload-release-action@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
       with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: install/bin/BananaSplit-${{ matrix.name }}.exe
-        asset_name: BananaSplit-${{ matrix.name }}.exe
-        overwrite: true
-        body: ""
+        file: install/bin/BananaSplit-${{ matrix.platform.name }}.exe
