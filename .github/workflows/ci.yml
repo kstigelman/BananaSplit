@@ -1,10 +1,7 @@
 name: CI
 
 
-on:
-  push:
-    tags:
-      - 'v*'
+on: [push]
 
 jobs:
   build:
@@ -74,6 +71,5 @@ jobs:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: install/bin/BananaSplit-${{ matrix.name }}.exe
         asset_name: BananaSplit-${{ matrix.name }}.exe
-        tag: ${{ github.ref }}
         overwrite: true
         body: ""
