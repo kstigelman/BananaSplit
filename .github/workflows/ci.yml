@@ -51,7 +51,7 @@ jobs:
 
     - name: Upload binaries to Release (UNIX)
       if: runner.os == 'Linux' || runner.os == 'MacOS'
-      uses: svenstaro/upload-release-action@v1
+      uses: xresloader/upload-to-github-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
       with:
@@ -59,7 +59,7 @@ jobs:
 
     - name: Upload binaries to Release (WINDOWS)
       if: runner.os == 'Windows'
-      uses: svenstaro/upload-release-action@v1
+      uses: xresloader/upload-to-github-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
       with:
