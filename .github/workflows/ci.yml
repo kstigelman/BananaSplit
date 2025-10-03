@@ -56,6 +56,7 @@ jobs:
     - name: Upload binaries to Release (UNIX)
       if: runner.os == 'Linux' || runner.os == 'MacOS'
       uses: xresloader/upload-to-github-release@v1
+      id: create_release
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
       with:
@@ -64,7 +65,15 @@ jobs:
     - name: Upload binaries to Release (WINDOWS)
       if: runner.os == 'Windows'
       uses: xresloader/upload-to-github-release@v1
+      id: create_release
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
       with:
         file: install/bin/BananaSplit-${{ matrix.platform.name }}.exe
+
+    - name: Publish release
+      uses: StuYarrow/publish-release@v1.1.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        id: ${{ steps.create_release.outputs.id }}
