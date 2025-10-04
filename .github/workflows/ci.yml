@@ -64,7 +64,7 @@ jobs:
     - name: Upload artifact 
       uses: actions/upload-artifact@v4 
       with: 
-        name: banana-split-${{ matrix.os }} 
+        name: banana-split-${{ runner.os }} 
         path: install/bin/banana-split-${{ runner.os }}.zip
 
   release:
@@ -80,6 +80,7 @@ jobs:
       uses: kstigelman/BananaSplit@v1
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        tag_name: v1.0.0   # or generate dynamically
-        release_name: "Release v1.0.0"
+        tag_name: release-${{ github.run_number }}-${{ runner.os }}   # or generate dynamically
+        release_name: "Release v1.0.0 ${{ github.run_number }}"
         artifacts: ./dist/**/*.zip
+        draft: false
