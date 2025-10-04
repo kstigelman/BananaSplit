@@ -1,7 +1,10 @@
 name: CI
 
 
-on: [push]
+on:
+  push:
+    tags:
+      - "v*"
 
 jobs:
 
@@ -22,7 +25,7 @@ jobs:
         #- { name: Linux Clang,    os: ubuntu-latest, flags: -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ }
         - { name: macos,          os: macos-latest  }
         config:
-        - { name: Shared, flags: -DBUILD_SHARED_LIBS=TRUE }
+        # - { name: Shared, flags: -DBUILD_SHARED_LIBS=TRUE }
         - { name: Static, flags: -DBUILD_SHARED_LIBS=FALSE }
 
     steps:
@@ -32,18 +35,6 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@v4
-    - name: Create release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
-      with:
-        tag_name: ${{ matrix.platform.os }}_${{ github.run_number }}
-        release_name: Release-${{ matrix.platform.os }}-${{ github.run_number }}
-        body: |
-          BananaSplit
-        draft: true
-        prerelease: false
 
     - name: Configure
       shell: bash
@@ -57,33 +48,42 @@ jobs:
       shell: bash
       run: cmake --install build --config Release
 
-    - name: Rename binary (WINDOWS)
-      if: runner.os == 'Windows'
-      run: mv install/bin/BananaSplit.exe install/bin/BananaSplit-${{ matrix.platform.name }}.exe
+    - name: Package executable 
+      run: |
+        cd build 
+        if [ "${{ runner.os }}" = "Windows" ]; then 
+          cp  install/bin/*.exe ../banana-split-${{ runner.os }}.exe 
+        else 
+          cp  install/bin/BananaSplit ../banana-split-${{ runner.os }} 
+        fi
+    - name: Zip executable (Linux/macOS) 
+      if: runner.os != 'Windows' 
+      run: |
+        zip banana-split-${{ runner.os }}.zip banana-split-${{ runner.os }} 
+    
+    - name: Zip executable (Windows) 
+      if: runner.os == 'Windows' 
+      run: |
+        powershell Compress-Archive -Path banana-split-${{ runner.os }}.exe -DestinationPath banana-split-${{ runner.os }}.zip     
+    
+    - name: Upload artifact 
+      uses: actions/upload-artifact@v4 
+      with: 
+        name: banana-split-${{ matrix.os }} 
+        path: banana-split-${{ matrix.os }}.zip
 
-    - name: Rename binary (UNIX)
-      if: runner.os == 'Linux' || runner.os == 'MacOS'
-      run: mv install/bin/BananaSplit install/bin/BananaSplit-${{ matrix.platform.name }}
-
-    - name: Upload binaries to Release (UNIX)
-      if: runner.os == 'Linux' || runner.os == 'MacOS'
-      uses: xresloader/upload-to-github-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
       with:
-        file: install/bin/BananaSplit-${{ matrix.platform.name }}
+        path: ./dist
 
-    - name: Upload binaries to Release (WINDOWS)
-      if: runner.os == 'Windows'
-      uses: xresloader/upload-to-github-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
       with:
-        file: install/bin/BananaSplit-${{ matrix.platform.name }}.exe
-
-    - name: Publish release
-      uses: StuYarrow/publish-release@v1.1.2
+        files: ./dist/**/*.zip
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        id: ${{ steps.create_release.outputs.id }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
