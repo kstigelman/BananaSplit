@@ -76,11 +76,3 @@ jobs:
       with:
         path: ./dist
         
-    - name: Release with Notes
-      uses: softprops/action-gh-release@v1
-      tag_name: ${{ github.ref }}
-      with:
-        files: |
-          ./dist/**/*.zip
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
