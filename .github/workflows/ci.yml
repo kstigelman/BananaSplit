@@ -31,7 +31,20 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@v4
-
+      
+    - name: Create release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        body: |
+          BananaSplit
+        draft: false
+        prerelease: false
+        
     - name: Configure
       shell: bash
       run: cmake -S . -B build -DCMAKE_INSTALL_PREFIX=install ${{matrix.platform.flags}} ${{matrix.config.flags}}
@@ -66,13 +79,12 @@ jobs:
       with: 
         name: banana-split-${{ runner.os }} 
         path: install/bin/banana-split-${{ runner.os }}.zip
-
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-    - name: Download all artifacts
-      uses: actions/download-artifact@v4
+        
+    - name: Upload binaries to Release
+      if: runner.os == 'Linux' || runner.os == 'MacOS'
+      uses: xresloader/upload-to-github-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
       with:
-        path: ./dist
+        file: install/bin/banana-split-${{ runner.os }}.zip
         
