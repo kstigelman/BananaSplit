@@ -46,26 +46,26 @@ jobs:
 
     - name: Package executable (Windows)
       if: runner.os == 'Windows'
-      run: cp install/bin/*.exe ../banana-split-${{ runner.os }}.exe 
+      run: cp install/bin/BananaSplit.exe banana-split-${{ runner.os }}.exe 
   
 
     - name: Package executable (Linux/macOS)
       if: runner.os != 'Windows'
-      run: cp install/bin/* ../banana-split-${{ runner.os }}
+      run: cp install/bin/BananaSplit banana-split-${{ runner.os }}
   
     - name: Zip executable (Linux/macOS) 
       if: runner.os != 'Windows' 
-      run: zip banana-split-${{ runner.os }}.zip banana-split-${{ runner.os }} 
+      run: zip install/bin/banana-split-${{ runner.os }}.zip install/bin/banana-split-${{ runner.os }} 
     
     - name: Zip executable (Windows) 
       if: runner.os == 'Windows' 
-      run: powershell Compress-Archive -Path banana-split-${{ runner.os }}.exe -DestinationPath banana-split-${{ runner.os }}.zip     
+      run: powershell Compress-Archive -Path install/bin/banana-split-${{ runner.os }}.exe -DestinationPath install/bin/banana-split-${{ runner.os }}.zip     
     
     - name: Upload artifact 
       uses: actions/upload-artifact@v4 
       with: 
         name: banana-split-${{ matrix.os }} 
-        path: banana-split-${{ matrix.os }}.zip
+        path: install/bin/banana-split-${{ matrix.os }}.zip
 
   release:
     needs: build
