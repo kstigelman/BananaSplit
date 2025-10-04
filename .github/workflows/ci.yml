@@ -75,12 +75,12 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         path: ./dist
-
-    - name: Create Release
-      uses: kstigelman/BananaSplit@safety
+        
+    - name: Release with Notes
+      uses: softprops/action-gh-release@v1
+      tag_name: ${{ github.ref }}
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        tag_name: release-${{ github.run_number }}-${{ runner.os }}   # or generate dynamically
-        release_name: "Release v1.0.0 ${{ github.run_number }}"
-        artifacts: ./dist/**/*.zip
-        draft: false
+        files: |
+          ./dist/**/*.zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
