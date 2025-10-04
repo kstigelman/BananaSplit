@@ -46,12 +46,12 @@ jobs:
 
     - name: Package executable (Windows)
       if: runner.os == 'Windows'
-      run: cp install/bin/BananaSplit.exe banana-split-${{ runner.os }}.exe 
+      run: cp install/bin/BananaSplit.exe install/bin/banana-split-${{ runner.os }}.exe 
   
 
     - name: Package executable (Linux/macOS)
       if: runner.os != 'Windows'
-      run: cp install/bin/BananaSplit banana-split-${{ runner.os }}
+      run: cp install/bin/BananaSplit install/bin/banana-split-${{ runner.os }}
   
     - name: Zip executable (Linux/macOS) 
       if: runner.os != 'Windows' 
