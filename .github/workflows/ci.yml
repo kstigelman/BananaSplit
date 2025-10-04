@@ -44,23 +44,22 @@ jobs:
       shell: bash
       run: cmake --install build --config Release
 
-    - name: Package executable 
-      run: |
-        if [ "${{ runner.os }}" = "Windows" ]; then 
-          cp  install/bin/*.exe ../banana-split-${{ runner.os }}.exe 
-        else 
-          cp  install/bin/BananaSplit ../banana-split-${{ runner.os }} 
-        fi
-        
+    - name: Package executable (Windows)
+      if: runner.os == 'Windows'
+      run: cp install/bin/*.exe ../banana-split-${{ runner.os }}.exe 
+  
+
+    - name: Package executable (Linux/macOS)
+      if: runner.os != 'Windows'
+      run: cp install/bin/* ../banana-split-${{ runner.os }}
+  
     - name: Zip executable (Linux/macOS) 
       if: runner.os != 'Windows' 
-      run: |
-        zip banana-split-${{ runner.os }}.zip banana-split-${{ runner.os }} 
+      run: zip banana-split-${{ runner.os }}.zip banana-split-${{ runner.os }} 
     
     - name: Zip executable (Windows) 
       if: runner.os == 'Windows' 
-      run: |
-        powershell Compress-Archive -Path banana-split-${{ runner.os }}.exe -DestinationPath banana-split-${{ runner.os }}.zip     
+      run: powershell Compress-Archive -Path banana-split-${{ runner.os }}.exe -DestinationPath banana-split-${{ runner.os }}.zip     
     
     - name: Upload artifact 
       uses: actions/upload-artifact@v4 
