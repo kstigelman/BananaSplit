@@ -65,7 +65,7 @@ jobs:
       uses: actions/upload-artifact@v4 
       with: 
         name: banana-split-${{ matrix.os }} 
-        path: install/bin/banana-split-${{ matrix.platform.os }}.zip
+        path: install/bin/banana-split-${{ runner.os }}.zip
 
   release:
     needs: build
