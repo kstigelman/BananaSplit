@@ -38,8 +38,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
       with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
+        tag_name: ${{ github.run_number }}
+        release_name: Release ${{ github.run_number }}-${{ runner.os }}
         body: |
           BananaSplit
         draft: false
@@ -88,3 +88,9 @@ jobs:
       with:
         file: install/bin/banana-split-${{ runner.os }}.zip
         
+    - name: Publish release
+      uses: StuYarrow/publish-release@v1.1.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        id: ${{ steps.create_release.outputs.id }}
