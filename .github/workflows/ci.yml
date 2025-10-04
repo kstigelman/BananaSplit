@@ -46,12 +46,12 @@ jobs:
 
     - name: Package executable 
       run: |
-        cd build 
         if [ "${{ runner.os }}" = "Windows" ]; then 
           cp  install/bin/*.exe ../banana-split-${{ runner.os }}.exe 
         else 
           cp  install/bin/BananaSplit ../banana-split-${{ runner.os }} 
         fi
+        
     - name: Zip executable (Linux/macOS) 
       if: runner.os != 'Windows' 
       run: |
