@@ -76,10 +76,10 @@ jobs:
       with:
         path: ./dist
 
-      - name: Create Release
-        uses: kstigelman/BananaSplit@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          tag_name: v1.0.0   # or generate dynamically
-          release_name: "Release v1.0.0"
-          artifacts: ./dist/**/*.zip
+    - name: Create Release
+      uses: kstigelman/BananaSplit@v1
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        tag_name: v1.0.0   # or generate dynamically
+        release_name: "Release v1.0.0"
+        artifacts: ./dist/**/*.zip
